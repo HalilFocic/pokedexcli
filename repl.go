@@ -20,16 +20,26 @@ func startRepl() {
 		scanner.Scan()
 		text := scanner.Text()
 
-        fmt.Print(text)
+		cleaned := cleanInput(text)
+		if len(cleaned) == 0 {
+			continue
+		}
+		commandName := cleaned[0]
+        availableCommands := getCommands()
+        command, ok := availableCommands[commandName]
+        if !ok {
+            fmt.Println("Invalid command")
+            continue 
+        }
+	    command.callback()	
 	}
-	
 
 }
 
-func cleanInput(str string) []string{
-    lowered := strings.ToLower(str)
-    words := strings.Fields(lowered)
-    return words
+func cleanInput(str string) []string {
+	lowered := strings.ToLower(str)
+	words := strings.Fields(lowered)
+	return words
 
 }
 func getCommands() map[string]cliCommand {
@@ -37,7 +47,7 @@ func getCommands() map[string]cliCommand {
 		"help": {
 			name:        "help",
 			description: "Displays a help message",
-			callback:    commandHelp,
+			callback:    callbackHelp,
 		},
 		"exit": {
 			name:        "exit",
@@ -46,21 +56,4 @@ func getCommands() map[string]cliCommand {
 		},
 	}
 	return commands
-}
-
-func commandHelp() error {
-	commands := getCommands()
-	fmt.Println("Welcome to the Pokedex!")
-	fmt.Print("Usage: \n\n")
-
-	for _, v := range commands {
-		m := fmt.Sprintf("%s: %s \n", v.name, v.description)
-		fmt.Print(m)
-	}
-	fmt.Print("\n")
-	return nil
-}
-func commandExit() error {
-	os.Exit(0)
-	return nil
 }
