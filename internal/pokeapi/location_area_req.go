@@ -16,7 +16,6 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreasResp, error) {
 	}
 	dat, ok := c.cache.Get(fullUrl)
 	if ok {
-        fmt.Println("Cache hit")
 		locationAreasResp := LocationAreasResp{}
 		err := json.Unmarshal(dat, &locationAreasResp)
 		if err != nil {
@@ -26,7 +25,6 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreasResp, error) {
 
 	}
 
-    fmt.Println("Cache missed")
 	req, err := http.NewRequest("GET", fullUrl, nil)
 	if err != nil {
 		fmt.Print("error na new request")
@@ -52,4 +50,46 @@ func (c *Client) ListLocationAreas(pageURL *string) (LocationAreasResp, error) {
 	}
     c.cache.Add(fullUrl,data)
 	return locationAreasResp, nil
+}
+func (c *Client) GetLocationArea(locationAreaName string) (LocationArea, error) {
+	endpoint := "/location-area/" + locationAreaName
+	fullUrl := baseURL + endpoint
+
+	
+	dat, ok := c.cache.Get(fullUrl)
+	if ok {
+		locationArea := LocationArea{}
+		err := json.Unmarshal(dat, &locationArea)
+		if err != nil {
+			return LocationArea{}, err
+		}
+        return locationArea, nil
+
+	}
+
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		fmt.Print("error na new request")
+		return LocationArea{}, err
+	}
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		fmt.Print("Error na DO")
+		return LocationArea{}, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode > 399 {
+		return LocationArea{}, fmt.Errorf("Bad status code: %v", resp.StatusCode)
+	}
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return LocationArea{}, err
+	}
+	locationArea := LocationArea{}
+	err = json.Unmarshal(data, &locationArea)
+	if err != nil {
+		return LocationArea{}, err
+	}
+    c.cache.Add(fullUrl,data)
+	return locationArea, nil
 }

@@ -5,34 +5,34 @@ import (
 	"fmt"
 )
 
-func callBackMap(cfg *config) error {
+func callBackMap(cfg *config, args ...string) error {
 	resp, err := cfg.pokeApiClient.ListLocationAreas(cfg.nextLocationAreaURL)
 	if err != nil {
-        return err
+		return err
 	}
 	fmt.Println("Location areas:")
 	for _, area := range resp.Results {
 		fmt.Printf(" - %s \n", area.Name)
 	}
-    cfg.nextLocationAreaURL = resp.Next
-    cfg.previousLocationAreaURL = resp.Previous
+	cfg.nextLocationAreaURL = resp.Next
+	cfg.previousLocationAreaURL = resp.Previous
 	return nil
 
 }
-func callBackMapb(cfg *config) error {
-    if cfg.previousLocationAreaURL == nil {
-        return errors.New("Your are on the first page")
-    }
+func callBackMapb(cfg *config, args ...string) error {
+	if cfg.previousLocationAreaURL == nil {
+		return errors.New("Your are on the first page")
+	}
 	resp, err := cfg.pokeApiClient.ListLocationAreas(cfg.previousLocationAreaURL)
 	if err != nil {
-	    return err	
+		return err
 	}
 	fmt.Println("Location areas:")
 	for _, area := range resp.Results {
 		fmt.Printf(" - %s \n", area.Name)
 	}
-    cfg.nextLocationAreaURL = resp.Next
-    cfg.previousLocationAreaURL = resp.Previous
+	cfg.nextLocationAreaURL = resp.Next
+	cfg.previousLocationAreaURL = resp.Previous
 	return nil
 
 }
